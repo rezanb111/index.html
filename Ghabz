@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>سیستم هوشمند صدور قبض دو زبانه</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;700;900&display=swap');
+        
+        body { font-family: 'Vazirmatn', sans-serif; background: #444; margin: 0; padding: 10px; color: #000; }
+        
+        /* پنل تنظیمات */
+        #input-panel { background: #fff; max-width: 900px; margin: 0 auto 30px; padding: 20px; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .input-group { display: flex; flex-direction: column; }
+        input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: 'Vazirmatn'; }
+        .gen-btn { grid-column: 1 / -1; background: #2e7d32; color: #fff; border: none; padding: 15px; cursor: pointer; font-weight: 900; font-size: 16px; margin-top: 10px; }
+        
+        /* استایل قبض */
+        .bill-container { background: #fff; width: 900px; margin: 20px auto; padding: 20px; border: 2px solid #000; position: relative; display: none; }
+        .header { display: grid; grid-template-columns: 150px 1fr 220px; align-items: center; border-bottom: 2px solid #000; padding-bottom: 10px; }
+        .logo-img { width: 80px; height: 80px; object-fit: contain; }
+        .header-center { text-align: center; }
+        .header-center h1 { margin: 0; font-size: 18px; font-weight: 900; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        th, td { border: 1px solid #000; padding: 4px; text-align: center; font-size: 10px; }
+        th { background: #f2f2f2; }
+        .bg-gray { background: #e9e9e9; }
+
+        .main-layout { display: grid; grid-template-columns: 260px 1fr; gap: 15px; margin-top: 10px; }
+        .middle-red-warning { color: #d32f2f; font-weight: 900; font-size: 14px; text-align: center; padding: 8px; border: 1px dashed #d32f2f; margin: 10px 0; background: #fff5f5; }
+
+        .visual-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; border-top: 1px solid #000; padding-top: 15px; }
+        .gauge-wrap { text-align: center; position: relative; }
+        .gauge-svg { width: 140px; transform: rotate(-90deg); }
+        
+        .h-bar-bg { background: #eee; height: 18px; width: 100%; margin: 3px 0; border: 1px solid #ccc; position: relative; }
+        .h-bar-fill { height: 100%; display: flex; align-items: center; padding-right: 5px; color: #fff; font-weight: bold; font-size: 9px; }
+
+        .pay-card { border: 2px solid #2196f3; background: #e3f2fd; text-align: center; padding: 10px; }
+        .price-large { font-size: 26px; font-weight: 900; color: #d32f2f; margin: 5px 0; }
+
+        .footer { display: grid; grid-template-columns: 180px 1fr 200px; margin-top: 20px; border-top: 1px solid #000; padding-top: 10px; }
+        .agent-img { width: 85px; height: 105px; border: 1px solid #000; object-fit: cover; }
+
+        .en-version { direction: ltr; font-family: Arial, sans-serif; border-top: 5px double #000; padding-top: 40px; margin-top: 40px; }
+        
+        @media print { #input-panel { display: none; } .bill-container { display: block !important; margin: 0 auto 50px; border: none; box-shadow: none; } body { background: #fff; } }
+    </style>
+</head>
+<body>
+
+<div id="input-panel">
+    <h2 style="text-align:center">ورود اطلاعات نهایی قبض</h2>
+    <div class="grid-inputs">
+        <div class="input-group"><label>نام و نام خانوادگی:</label><input type="text" id="in_name" value="محسن سازنده اصفهانی"></div>
+        <div class="input-group"><label>استان/شهر:</label><input type="text" id="in_city" value="اصفهان"></div>
+        <div class="input-group"><label>آدرس کامل:</label><input type="text" id="in_address" value="واحد یلدا مجتمع برنده خیابان اصفهان ۲"></div>
+        <div class="input-group"><label>مبلغ نهایی (ریال):</label><input type="text" id="in_price" value="۵۹۲,۰۰۰"></div>
+        <div class="input-group"><label>شناسه قبض:</label><input type="text" id="in_billid" value="۷۹۱۶۱۰۹۸۰۴۳۲۰"></div>
+        <div class="input-group"><label>شناسه پرداخت:</label><input type="text" id="in_payid" value="۰۰۰۰۰۵۹۲۳۱۴۰۴"></div>
+        <div class="input-group"><label>مهلت پرداخت:</label><input type="text" id="in_date" value="۱۴۰۴/۱۱/۲۴"></div>
+        <button class="gen-btn" onclick="generate()">تولید و نمایش نسخه‌های قبض</button>
+    </div>
+</div>
+
+<div class="bill-container" id="fa_bill">
+    <div class="header">
+        <img src="https://logoyab.com/wp-content/uploads/2025/03/Electricity-Department-Logo-1-1030x1030.png" class="logo-img">
+        <div class="header-center">
+            <h1>شرکت توزیع نیروی برق استان <span class="out_city"></span></h1>
+            <div>aepdc.ir</div>
+            <div style="margin-top:5px; border:1px solid #000; display:inline-block; padding:2px 10px;"><b>دوره پیش بینی ۱۴۰۴</b></div>
+        </div>
+        <div style="font-size: 9px; text-align: left;">
+            شناسه قبض: <b class="out_billid"></b><br>
+            شناسه پرداخت: <b class="out_payid"></b><br>
+            رمز رایانه: ۹۱۶۱۰۹۸
+        </div>
+    </div>
+
+    <div class="main-layout">
+        <table>
+            <tr class="bg-gray"><th>شرح صورتحساب</th><th>مبلغ (ریال)</th></tr>
+            <tr><td style="text-align:right">مبلغ مصرف / آبونمان</td><td>۳۵۵,۲۰۶</td></tr>
+            <tr><td style="text-align:right">مالیات و عوارض برق</td><td>۷۱,۶۶۷</td></tr>
+            <tr><td style="text-align:right">بیمه همگانی حوادث</td><td>۱۴۲,۵۰۰</td></tr>
+            <tr class="bg-gray"><td><b>قابل پرداخت</b></td><td style="color:red; font-weight:900" class="out_total"></td></tr>
+            <tr><td><b>مهلت پرداخت</b></td><td class="out_deadline"></td></tr>
+        </table>
+        <div class="data-col">
+            <table>
+                <tr class="bg-gray"><th>شرح</th><th>تاریخ</th><th>مبنای جاری</th><th>اوج باری</th><th>دوره</th></tr>
+                <tr><td>قرائت کنونی</td><td>۱۴۰۴/۱۱/۰۱</td><td>۶۶۳۱.۱۵</td><td>۳۱۹۴.۳۴</td><td rowspan="2">۱۲</td></tr>
+                <tr><td>قرائت پیشین</td><td>۱۴۰۴/۱۰/۰۱</td><td>۶۵۰۱.۶۹</td><td>۳۱۳۷.۵۶</td></tr>
+            </table>
+            <div style="padding: 8px; border: 1px solid #000; margin-top: 5px;">
+                مشترک محترم: <b class="out_name"></b> | نشانی: <span class="out_address"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="middle-red-warning">عدم پرداخت به موقع مبلغ صورتحساب موجب قطع انشعاب برق خواهد شد</div>
+
+    <div class="visual-grid">
+        <div>
+            <small>مقایسه مصرف ماهانه</small>
+            <div class="h-bar-bg"><div class="h-bar-fill" style="width:70%; background:#4caf50;">شما: ۱۴۸</div></div>
+            <div class="h-bar-bg"><div class="h-bar-fill" style="width:85%; background:#8bc34a;">شهر: ۱۶۹</div></div>
+        </div>
+        <div class="gauge-wrap">
+            <svg class="gauge-svg" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#eee" stroke-width="10" />
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#4caf50" stroke-width="10" stroke-dasharray="120 251" />
+                <line x1="50" y1="50" x2="50" y2="15" stroke="orange" stroke-width="3" transform="rotate(45 50 50)" />
+            </svg>
+            <div style="margin-top:-55px; font-weight:900; font-size:16px;">148.06</div>
+        </div>
+        <div class="pay-card">
+            <div>مبلغ قابل پرداخت (ریال)</div>
+            <div class="price-large class_price"></div>
+            <div>تا تاریخ: <b class="out_deadline"></b></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div style="text-align:center">
+            <img src="https://uploadkon.ir/uploads/e17115_26IMG-۲۰۲۶۰۲۱۶-۰۳۱۵۲۱.jpg" class="agent-img">
+            <div><b>آقای علی ابریان</b></div>
+            <div style="font-size:9px;">مأمور قرائت منطقه</div>
+        </div>
+        <div style="padding: 10px;">
+            <b style="color:blue">سامانه برق ایران (برق من)</b>
+            <p>اپلیکیشن «برق من» را نصب کنید. Bargheman.com</p>
+        </div>
+        <div style="text-align:center;">
+            <div style="width:50px; height:50px; background:#4caf50; border-radius:50%; margin:0 auto; line-height:50px; color:#fff; font-weight:bold;">۴٪-</div>
+            <p style="font-size:9px">کاهش نسبت به سال قبل</p>
+        </div>
+    </div>
+</div>
+
+<div class="bill-container en-version" id="en_bill">
+    <div class="header">
+        <img src="https://logoyab.com/wp-content/uploads/2025/03/Electricity-Department-Logo-1-1030x1030.png" class="logo-img">
+        <div class="header-center">
+            <h1><span class="out_city_en"></span> Province Electricity Distribution Co.</h1>
+            <div>aepdc.ir</div>
+            <div style="margin-top:5px; border:1px solid #000; display:inline-block; padding:2px 10px;"><b>2026 Forecast Period</b></div>
+        </div>
+        <div style="font-size: 9px; text-align: right;">
+            Bill ID: <b class="out_billid"></b><br>
+            Pay ID: <b class="out_payid"></b><br>
+            PC Code: 9161098
+        </div>
+    </div>
+
+    <div class="main-layout" style="grid-template-columns: 1fr 260px;">
+        <div class="data-col">
+            <table>
+                <tr class="bg-gray"><th>Description</th><th>Date</th><th>Current</th><th>Peak</th><th>Period</th></tr>
+                <tr><td>Current Reading</td><td>2026/01/21</td><td>6631.15</td><td>3194.34</td><td rowspan="2">12</td></tr>
+                <tr><td>Previous Reading</td><td>2025/12/21</td><td>6501.69</td><td>3137.56</td></tr>
+            </table>
+            <div style="padding: 8px; border: 1px solid #000; margin-top: 5px; text-align: left;">
+                Subscriber: <b class="out_name"></b> | Address: <span class="out_address"></span>
+            </div>
+        </div>
+        <table>
+            <tr class="bg-gray"><th>Description</th><th>Amount (IRR)</th></tr>
+            <tr><td>Consumption / Subscription</td><td>355,206</td></tr>
+            <tr><td>Tax & Duties</td><td>71,667</td></tr>
+            <tr><td>Insurance</td><td>142,500</td></tr>
+            <tr class="bg-gray"><td><b>Total Payable</b></td><td style="color:red; font-weight:900" class="out_total"></td></tr>
+        </table>
+    </div>
+
+    <div class="middle-red-warning">FAILURE TO PAY ON TIME WILL RESULT IN DISCONNECTION</div>
+
+    <div class="visual-grid">
+        <div class="pay-card">
+            <div>Total Payable (Rials)</div>
+            <div class="price-large class_price"></div>
+            <div>Due Date: <b class="out_deadline"></b></div>
+        </div>
+        <div class="gauge-wrap">
+            <svg class="gauge-svg" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#eee" stroke-width="10" />
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#4caf50" stroke-width="10" stroke-dasharray="120 251" />
+                <line x1="50" y1="50" x2="50" y2="15" stroke="orange" stroke-width="3" transform="rotate(45 50 50)" />
+            </svg>
+            <div style="margin-top:-55px; font-weight:900; font-size:16px;">148.06</div>
+        </div>
+        <div>
+            <small>Consumption Comparison</small>
+            <div class="h-bar-bg"><div class="h-bar-fill" style="width:70%; background:#4caf50;">You: 148</div></div>
+            <div class="h-bar-bg"><div class="h-bar-fill" style="width:85%; background:#8bc34a;">City: 169</div></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div style="text-align:center;">
+            <div style="width:50px; height:50px; background:#4caf50; border-radius:50%; margin:0 auto; line-height:50px; color:#fff; font-weight:bold;">-4%</div>
+            <p style="font-size:9px">Reduction vs Last Year</p>
+        </div>
+        <div style="padding: 10px; text-align: center;">
+            <b style="color:blue">IRAN POWER SYSTEM (MyBagh)</b>
+            <p>Install "MyBagh" app. Bargheman.com</p>
+        </div>
+        <div style="text-align:center">
+            <img src="https://uploadkon.ir/uploads/e17115_26IMG-۲۰۲۶۰۲۱۶-۰۳۱۵۲۱.jpg" class="agent-img">
+            <div><b>Mr. Ali Abrian</b></div>
+            <div style="font-size:9px;">Reading Officer</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function generate() {
+        const d = {
+            name: document.getElementById('in_name').value,
+            city: document.getElementById('in_city').value,
+            address: document.getElementById('in_address').value,
+            price: document.getElementById('in_price').value,
+            billid: document.getElementById('in_billid').value,
+            payid: document.getElementById('in_payid').value,
+            date: document.getElementById('in_date').value
+        };
+        
+        // آپدیت تمام فیلدهای فارسی و انگلیسی
+        document.querySelectorAll('.out_name').forEach(el => el.innerText = d.name);
+        document.querySelectorAll('.out_city').forEach(el => el.innerText = d.city);
+        document.querySelectorAll('.out_city_en').forEach(el => el.innerText = d.city);
+        document.querySelectorAll('.out_address').forEach(el => el.innerText = d.address);
+        document.querySelectorAll('.out_total').forEach(el => el.innerText = d.price);
+        document.querySelectorAll('.class_price').forEach(el => el.innerText = d.price);
+        document.querySelectorAll('.out_billid').forEach(el => el.innerText = d.billid);
+        document.querySelectorAll('.out_payid').forEach(el => el.innerText = d.payid);
+        document.querySelectorAll('.out_deadline').forEach(el => el.innerText = d.date);
+        
+        document.getElementById('fa_bill').style.display = 'block';
+        document.getElementById('en_bill').style.display = 'block';
+        
+        window.scrollTo({ top: document.getElementById('fa_bill').offsetTop, behavior: 'smooth' });
+    }
+</script>
+</body>
+</html>

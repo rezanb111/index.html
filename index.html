@@ -2,247 +2,222 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>سیستم هوشمند صدور قبض دو زبانه</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Narges Tarafi | The Royal Lash Art</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;700;900&display=swap');
-        
-        body { font-family: 'Vazirmatn', sans-serif; background: #444; margin: 0; padding: 10px; color: #000; }
-        
-        /* پنل تنظیمات */
-        #input-panel { background: #fff; max-width: 900px; margin: 0 auto 30px; padding: 20px; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .input-group { display: flex; flex-direction: column; }
-        input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: 'Vazirmatn'; }
-        .gen-btn { grid-column: 1 / -1; background: #2e7d32; color: #fff; border: none; padding: 15px; cursor: pointer; font-weight: 900; font-size: 16px; margin-top: 10px; }
-        
-        /* استایل قبض */
-        .bill-container { background: #fff; width: 900px; margin: 20px auto; padding: 20px; border: 2px solid #000; position: relative; display: none; }
-        .header { display: grid; grid-template-columns: 150px 1fr 220px; align-items: center; border-bottom: 2px solid #000; padding-bottom: 10px; }
-        .logo-img { width: 80px; height: 80px; object-fit: contain; }
-        .header-center { text-align: center; }
-        .header-center h1 { margin: 0; font-size: 18px; font-weight: 900; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 5px; }
-        th, td { border: 1px solid #000; padding: 4px; text-align: center; font-size: 10px; }
-        th { background: #f2f2f2; }
-        .bg-gray { background: #e9e9e9; }
+        :root { --p: #ff007f; --b: #00d2ff; --v: #bc13fe; --dark: #000; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--dark); color: #fff; font-family: 'Segoe UI', Tahoma, sans-serif; overflow-x: hidden; scroll-behavior: smooth; }
 
-        .main-layout { display: grid; grid-template-columns: 260px 1fr; gap: 15px; margin-top: 10px; }
-        .middle-red-warning { color: #d32f2f; font-weight: 900; font-size: 14px; text-align: center; padding: 8px; border: 1px dashed #d32f2f; margin: 10px 0; background: #fff5f5; }
+        .top-marquee {
+            position: fixed; top: 0; left: 0; width: 100%; height: 25px;
+            background: rgba(255, 0, 127, 0.2); backdrop-filter: blur(5px);
+            border-bottom: 1px solid var(--p); z-index: 10001;
+            display: flex; align-items: center; overflow: hidden; white-space: nowrap;
+        }
+        .marquee-text {
+            display: inline-block; animation: scroll-top 25s linear infinite;
+            font-size: 11px; font-weight: bold; color: #fff; text-shadow: 0 0 5px var(--p);
+        }
+        @keyframes scroll-top { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
 
-        .visual-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; border-top: 1px solid #000; padding-top: 15px; }
-        .gauge-wrap { text-align: center; position: relative; }
-        .gauge-svg { width: 140px; transform: rotate(-90deg); }
-        
-        .h-bar-bg { background: #eee; height: 18px; width: 100%; margin: 3px 0; border: 1px solid #ccc; position: relative; }
-        .h-bar-fill { height: 100%; display: flex; align-items: center; padding-right: 5px; color: #fff; font-weight: bold; font-size: 9px; }
+        #introPage {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, #1a0010, #000);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10002; transition: 0.8s;
+        }
+        .intro-img { 
+            width: 170px; height: 170px; border-radius: 50%; 
+            border: 3px solid var(--b); box-shadow: 0 0 30px var(--b); 
+            object-fit: cover; margin-bottom: 20px; animation: glow-b 2s infinite alternate;
+        }
+        @keyframes glow-b { from { box-shadow: 0 0 10px var(--b); } to { box-shadow: 0 0 40px var(--b); } }
+        .enter-btn { 
+            padding: 12px 45px; border: 2px solid var(--p); background: none; 
+            color: #fff; border-radius: 50px; cursor: pointer; 
+            box-shadow: 0 0 15px var(--p); font-weight: bold; transition: 0.4s;
+        }
+        .enter-btn:hover { background: var(--p); box-shadow: 0 0 40px var(--p); }
 
-        .pay-card { border: 2px solid #2196f3; background: #e3f2fd; text-align: center; padding: 10px; }
-        .price-large { font-size: 26px; font-weight: 900; color: #d32f2f; margin: 5px 0; }
+        #mainSite { display: none; padding-top: 30px; }
+        canvas#rainCanvas { position: fixed; top: 0; left: 0; z-index: 1; pointer-events: none; }
 
-        .footer { display: grid; grid-template-columns: 180px 1fr 200px; margin-top: 20px; border-top: 1px solid #000; padding-top: 10px; }
-        .agent-img { width: 85px; height: 105px; border: 1px solid #000; object-fit: cover; }
+        header { height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 10; }
+        .main-logo { width: 280px; filter: drop-shadow(0 0 20px var(--p)); animation: pulse 3s infinite alternate; }
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.08); } }
 
-        .en-version { direction: ltr; font-family: Arial, sans-serif; border-top: 5px double #000; padding-top: 40px; margin-top: 40px; }
-        
-        @media print { #input-panel { display: none; } .bill-container { display: block !important; margin: 0 auto 50px; border: none; box-shadow: none; } body { background: #fff; } }
+        .side-bar { 
+            position: fixed; top: 50%; transform: translateY(-50%); 
+            display: flex; flex-direction: column; gap: 18px; z-index: 2000; 
+            background: rgba(255, 255, 255, 0.05); padding: 15px 8px; 
+            border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+        }
+        .side-bar.l { left: 8px; }
+        .side-bar.r { right: 8px; }
+        .side-item { text-decoration: none; display: flex; flex-direction: column; align-items: center; transition: 0.4s; }
+        .side-item i { font-size: 1.3rem; color: var(--b); text-shadow: 0 0 10px var(--b), 0 0 20px var(--b); }
+        .side-item span { font-size: 8px; margin-top: 4px; color: #ddd; letter-spacing: 1px; text-transform: uppercase; }
+        .side-item:hover { transform: scale(1.3); }
+        .side-item:hover i { color: var(--p); text-shadow: 0 0 15px var(--p), 0 0 30px var(--p); }
+
+        .slider-wrap { overflow: hidden; padding: 50px 0; background: rgba(0,0,0,0.5); position: relative; z-index: 5; }
+        .track { display: flex; width: calc(210px * 16); animation: infinite-scroll 25s linear infinite; }
+        .track img { 
+            width: 190px; height: 190px; margin: 0 10px; border-radius: 20px; 
+            border: 2px solid var(--p); object-fit: cover; box-shadow: 0 0 15px rgba(255, 0, 127, 0.3);
+        }
+        @keyframes infinite-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(calc(-210px * 8)); } }
+
+        .online-support { 
+            position: fixed; bottom: 100px; right: 25px; width: 60px; height: 60px; 
+            background: var(--v); border-radius: 50%; display: flex; align-items: center; 
+            justify-content: center; color: #fff; z-index: 3000; 
+            box-shadow: 0 0 20px var(--v); animation: pulse-v 2s infinite; text-decoration: none; font-size: 1.6rem;
+        }
+        @keyframes pulse-v { 0% { box-shadow: 0 0 0 0 rgba(188, 19, 254, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(188, 19, 254, 0); } 100% { box-shadow: 0 0 0 0 rgba(188, 19, 254, 0); } }
+
+        .bio-section { max-width: 850px; margin: 60px auto; position: relative; z-index: 10; padding: 0 20px; }
+        .bio-card { 
+            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 210, 255, 0.3); 
+            border-radius: 40px; overflow: hidden; backdrop-filter: blur(15px);
+            display: flex; flex-direction: column; align-items: center; padding: 40px; box-shadow: 0 0 30px rgba(0, 210, 255, 0.1);
+        }
+        .bio-card img { width: 100%; max-width: 500px; border-radius: 25px; border: 2px solid var(--p); margin-bottom: 30px; }
+        .bio-card h2 { color: var(--b); margin-bottom: 15px; letter-spacing: 2px; }
+        .bio-card p { line-height: 2; text-align: justify; color: #eee; font-size: 1.05rem; }
+
+        .bottom-nav { 
+            position: fixed; bottom: 0; width: 100%; height: 75px; 
+            background: rgba(0,0,0,0.9); border-top: 2px solid var(--p); 
+            display: flex; justify-content: center; align-items: center; gap: 30px; z-index: 2500;
+        }
+        .social-link { font-size: 1.8rem; color: #fff; transition: 0.4s; }
+        .social-link i { text-shadow: 0 0 10px var(--p), 0 0 20px var(--p); }
+        .social-link:hover { transform: translateY(-10px); color: var(--b); }
+        .social-link:hover i { text-shadow: 0 0 10px var(--b), 0 0 20px var(--b); }
+
+        footer { text-align: center; padding: 40px 20px 120px; font-size: 11px; color: #555; position: relative; z-index: 10; }
+        footer strong { color: var(--p); }
+
+        @media (max-width: 600px) {
+            .side-bar { padding: 10px 4px; gap: 20px; }
+            .side-item span { display: none; }
+            .main-logo { width: 220px; }
+            .bio-card { padding: 25px; }
+        }
     </style>
 </head>
 <body>
 
-<div id="input-panel">
-    <h2 style="text-align:center">ورود اطلاعات نهایی قبض</h2>
-    <div class="grid-inputs">
-        <div class="input-group"><label>نام و نام خانوادگی:</label><input type="text" id="in_name" value="محسن سازنده اصفهانی"></div>
-        <div class="input-group"><label>استان/شهر:</label><input type="text" id="in_city" value="اصفهان"></div>
-        <div class="input-group"><label>آدرس کامل:</label><input type="text" id="in_address" value="واحد یلدا مجتمع برنده خیابان اصفهان ۲"></div>
-        <div class="input-group"><label>مبلغ نهایی (ریال):</label><input type="text" id="in_price" value="۵۹۲,۰۰۰"></div>
-        <div class="input-group"><label>شناسه قبض:</label><input type="text" id="in_billid" value="۷۹۱۶۱۰۹۸۰۴۳۲۰"></div>
-        <div class="input-group"><label>شناسه پرداخت:</label><input type="text" id="in_payid" value="۰۰۰۰۰۵۹۲۳۱۴۰۴"></div>
-        <div class="input-group"><label>مهلت پرداخت:</label><input type="text" id="in_date" value="۱۴۰۴/۱۱/۲۴"></div>
-        <button class="gen-btn" onclick="generate()">تولید و نمایش نسخه‌های قبض</button>
-    </div>
-</div>
-
-<div class="bill-container" id="fa_bill">
-    <div class="header">
-        <img src="https://logoyab.com/wp-content/uploads/2025/03/Electricity-Department-Logo-1-1030x1030.png" class="logo-img">
-        <div class="header-center">
-            <h1>شرکت توزیع نیروی برق استان <span class="out_city"></span></h1>
-            <div>aepdc.ir</div>
-            <div style="margin-top:5px; border:1px solid #000; display:inline-block; padding:2px 10px;"><b>دوره پیش بینی ۱۴۰۴</b></div>
-        </div>
-        <div style="font-size: 9px; text-align: left;">
-            شناسه قبض: <b class="out_billid"></b><br>
-            شناسه پرداخت: <b class="out_payid"></b><br>
-            رمز رایانه: ۹۱۶۱۰۹۸
+    <div class="top-marquee">
+        <div class="marquee-text">
+             💎 نـرگس طـرفی؛ متخصص بـین‌المللی اکستنشن مژه و مـدرس بـرتر 💎 آمـوزش صـفر تا صـد تـضمینی 💎 بـهترین مـتریال روسی و مـاندگاری بـالا 💎 بـا مـا چـشمانت سـخن می‌گویند 💎
         </div>
     </div>
 
-    <div class="main-layout">
-        <table>
-            <tr class="bg-gray"><th>شرح صورتحساب</th><th>مبلغ (ریال)</th></tr>
-            <tr><td style="text-align:right">مبلغ مصرف / آبونمان</td><td>۳۵۵,۲۰۶</td></tr>
-            <tr><td style="text-align:right">مالیات و عوارض برق</td><td>۷۱,۶۶۷</td></tr>
-            <tr><td style="text-align:right">بیمه همگانی حوادث</td><td>۱۴۲,۵۰۰</td></tr>
-            <tr class="bg-gray"><td><b>قابل پرداخت</b></td><td style="color:red; font-weight:900" class="out_total"></td></tr>
-            <tr><td><b>مهلت پرداخت</b></td><td class="out_deadline"></td></tr>
-        </table>
-        <div class="data-col">
-            <table>
-                <tr class="bg-gray"><th>شرح</th><th>تاریخ</th><th>مبنای جاری</th><th>اوج باری</th><th>دوره</th></tr>
-                <tr><td>قرائت کنونی</td><td>۱۴۰۴/۱۱/۰۱</td><td>۶۶۳۱.۱۵</td><td>۳۱۹۴.۳۴</td><td rowspan="2">۱۲</td></tr>
-                <tr><td>قرائت پیشین</td><td>۱۴۰۴/۱۰/۰۱</td><td>۶۵۰۱.۶۹</td><td>۳۱۳۷.۵۶</td></tr>
-            </table>
-            <div style="padding: 8px; border: 1px solid #000; margin-top: 5px;">
-                مشترک محترم: <b class="out_name"></b> | نشانی: <span class="out_address"></span>
+    <div id="introPage">
+        <img src="https://uploadkon.ir/uploads/c3a921_26IMG-۲۰۲۶۰۲۲۱-۱۹۴۷۴۲.jpg" class="intro-img">
+        <img src="https://uploadkon.ir/uploads/f11b21_26Negar-1771700898919.png" style="width:140px; margin-bottom:20px; filter: drop-shadow(0 0 10px var(--p));">
+        <button class="enter-btn" onclick="startApp()">ENTER THE STUDIO</button>
+    </div>
+
+    <div id="mainSite">
+        <canvas id="rainCanvas"></canvas>
+        <a href="#" class="online-support" title="پشتیبانی آنلاین"><i class="fas fa-headset"></i></a>
+
+        <header>
+            <img src="https://uploadkon.ir/uploads/f11b21_26Negar-1771700898919.png" class="main-logo">
+        </header>
+
+        <div class="side-bar l">
+            <a href="#" class="side-item"><i class="fas fa-home"></i><span>Home</span></a>
+            <a href="#" class="side-item"><i class="fas fa-eye"></i><span>Gallery</span></a>
+            <a href="#" class="side-item"><i class="fas fa-gem"></i><span>Service</span></a>
+            <a href="#" class="side-item"><i class="fas fa-graduation-cap"></i><span>Course</span></a>
+            <a href="#" class="side-item"><i class="fas fa-crown"></i><span>VIP</span></a>
+        </div>
+        <div class="side-bar r">
+            <a href="#" class="side-item"><i class="fas fa-phone-alt"></i><span>Contact</span></a>
+            <a href="#" class="side-item"><i class="fas fa-clock"></i><span>Booking</span></a>
+            <a href="#" class="side-item"><i class="fas fa-map-marked"></i><span>Map</span></a>
+            <a href="#" class="side-item"><i class="fas fa-question-circle"></i><span>FAQ</span></a>
+            <a href="#" class="side-item"><i class="fas fa-user-tie"></i><span>About</span></a>
+        </div>
+
+        <div class="slider-wrap">
+            <div class="track">
+                <img src="https://uploadkon.ir/uploads/1a9421_26Screenshot-۲۰۲۶-۰۲-۲۱-۱۹-۴۲-۲۶-۲۸۰-com-android-chrome-edit.jpg">
+                <img src="https://uploadkon.ir/uploads/ac9d21_26Screenshot-۲۰۲۶-۰۲-۲۱-۱۹-۴۴-۲۱-۱۶۳-com-android-chrome-edit.jpg">
+                <img src="https://uploadkon.ir/uploads/f84c21_26Screenshot-۲۰۲۶-۰۲-۲۱-۱۹-۴۳-۵۳-۹۴۵-com-android-chrome-edit.jpg">
+                <img src="https://uploadkon.ir/uploads/1d1e21_26Screenshot-۲۰۲۶-۰۲-۲۱-۱۹-۴۵-۳۱-۸۷۰-com-android-chrome-edit.jpg">
+                <img src="https://uploadkon.ir/uploads/5f1321_26Screenshot-۲۰۲۶-۰۲-۲۱-۱۹-۴۳-۱۳-۴۸۸-com-android-chrome-edit.jpg">
+                <img src="https://uploadkon.ir/uploads/7c7721_26Screenshot-۲۰۲۶-۰۲-۲۱-۱۹-۴۵-۰۹-۵۰۷-com-android-chrome-edit.jpg">
+                <img src="https://uploadkon.ir/uploads/f0cb21_26Screenshot-۲۰۲۶-۰۲-۲۱-۱۹-۴۴-۴۷-۹۱۸-com-android-chrome-edit.jpg">
+                <img src="https://uploadkon.ir/uploads/30e321_26Screenshot-۲۰۲۶-۰۲-۲۱-۱۹-۴۲-۵۱-۲۷۶-com-android-chrome-edit.jpg">
+                <img src="https://uploadkon.ir/uploads/1a9421_26Screenshot-۲۰۲۶-۰۲-۲۱-۱۹-۴۲-۲۶-۲۸۰-com-android-chrome-edit.jpg">
+                <img src="https://uploadkon.ir/uploads/ac9d21_26Screenshot-۲۰۲۶-۰۲-۲۱-۱۹-۴۴-۲۱-۱۶۳-com-android-chrome-edit.jpg">
+                <img src="https://uploadkon.ir/uploads/f84c21_26Screenshot-۲۰۲۶-۰۲-۲۱-۱۹-۴۳-۵۳-۹۴۵-com-android-chrome-edit.jpg">
+                <img src="https://uploadkon.ir/uploads/1d1e21_26Screenshot-۲۰۲۶-۰۲-۲۱-۱۹-۴۵-۳۱-۸۷۰-com-android-chrome-edit.jpg">
+                <img src="https://uploadkon.ir/uploads/5f1321_26Screenshot-۲۰۲۶-۰۲-۲۱-۱۹-۴۳-۱۳-۴۸۸-com-android-chrome-edit.jpg">
+                <img src="https://uploadkon.ir/uploads/7c7721_26Screenshot-۲۰۲۶-۰۲-۲۱-۱۹-۴۵-۰۹-۵۰۷-com-android-chrome-edit.jpg">
+                <img src="https://uploadkon.ir/uploads/f0cb21_26Screenshot-۲۰۲۶-۰۲-۲۱-۱۹-۴۴-۴۷-۹۱۸-com-android-chrome-edit.jpg">
+                <img src="https://uploadkon.ir/uploads/30e321_26Screenshot-۲۰۲۶-۰۲-۲۱-۱۹-۴۲-۵۱-۲۷۶-com-android-chrome-edit.jpg">
             </div>
         </div>
-    </div>
 
-    <div class="middle-red-warning">عدم پرداخت به موقع مبلغ صورتحساب موجب قطع انشعاب برق خواهد شد</div>
-
-    <div class="visual-grid">
-        <div>
-            <small>مقایسه مصرف ماهانه</small>
-            <div class="h-bar-bg"><div class="h-bar-fill" style="width:70%; background:#4caf50;">شما: ۱۴۸</div></div>
-            <div class="h-bar-bg"><div class="h-bar-fill" style="width:85%; background:#8bc34a;">شهر: ۱۶۹</div></div>
-        </div>
-        <div class="gauge-wrap">
-            <svg class="gauge-svg" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="40" fill="none" stroke="#eee" stroke-width="10" />
-                <circle cx="50" cy="50" r="40" fill="none" stroke="#4caf50" stroke-width="10" stroke-dasharray="120 251" />
-                <line x1="50" y1="50" x2="50" y2="15" stroke="orange" stroke-width="3" transform="rotate(45 50 50)" />
-            </svg>
-            <div style="margin-top:-55px; font-weight:900; font-size:16px;">148.06</div>
-        </div>
-        <div class="pay-card">
-            <div>مبلغ قابل پرداخت (ریال)</div>
-            <div class="price-large class_price"></div>
-            <div>تا تاریخ: <b class="out_deadline"></b></div>
-        </div>
-    </div>
-
-    <div class="footer">
-        <div style="text-align:center">
-            <img src="https://uploadkon.ir/uploads/e17115_26IMG-۲۰۲۶۰۲۱۶-۰۳۱۵۲۱.jpg" class="agent-img">
-            <div><b>آقای علی ابریان</b></div>
-            <div style="font-size:9px;">مأمور قرائت منطقه</div>
-        </div>
-        <div style="padding: 10px;">
-            <b style="color:blue">سامانه برق ایران (برق من)</b>
-            <p>اپلیکیشن «برق من» را نصب کنید. Bargheman.com</p>
-        </div>
-        <div style="text-align:center;">
-            <div style="width:50px; height:50px; background:#4caf50; border-radius:50%; margin:0 auto; line-height:50px; color:#fff; font-weight:bold;">۴٪-</div>
-            <p style="font-size:9px">کاهش نسبت به سال قبل</p>
-        </div>
-    </div>
-</div>
-
-<div class="bill-container en-version" id="en_bill">
-    <div class="header">
-        <img src="https://logoyab.com/wp-content/uploads/2025/03/Electricity-Department-Logo-1-1030x1030.png" class="logo-img">
-        <div class="header-center">
-            <h1><span class="out_city_en"></span> Province Electricity Distribution Co.</h1>
-            <div>aepdc.ir</div>
-            <div style="margin-top:5px; border:1px solid #000; display:inline-block; padding:2px 10px;"><b>2026 Forecast Period</b></div>
-        </div>
-        <div style="font-size: 9px; text-align: right;">
-            Bill ID: <b class="out_billid"></b><br>
-            Pay ID: <b class="out_payid"></b><br>
-            PC Code: 9161098
-        </div>
-    </div>
-
-    <div class="main-layout" style="grid-template-columns: 1fr 260px;">
-        <div class="data-col">
-            <table>
-                <tr class="bg-gray"><th>Description</th><th>Date</th><th>Current</th><th>Peak</th><th>Period</th></tr>
-                <tr><td>Current Reading</td><td>2026/01/21</td><td>6631.15</td><td>3194.34</td><td rowspan="2">12</td></tr>
-                <tr><td>Previous Reading</td><td>2025/12/21</td><td>6501.69</td><td>3137.56</td></tr>
-            </table>
-            <div style="padding: 8px; border: 1px solid #000; margin-top: 5px; text-align: left;">
-                Subscriber: <b class="out_name"></b> | Address: <span class="out_address"></span>
+        <section class="bio-section">
+            <div class="bio-card">
+                <img src="https://uploadkon.ir/uploads/ac1921_26IMG-۲۰۲۶۰۲۲۱-۲۲۲۸۵۹.jpg">
+                <h2>EXPERIENCE EXCELLENCE</h2>
+                <p>
+                    من <strong>نرگس طرفی</strong>، با سال‌ها تجربه در تراز اول صنعت زیبایی، لاین تخصصی مژه را به یک اثر هنری تبدیل کرده‌ام. هدف ما در این استودیو، تنها زیبایی نیست؛ بلکه حفظ سلامت مژه‌های طبیعی شما با استفاده از تکنیک‌های روز روسیه و بهترین متریال‌های جهانی است. ما با تکیه بر دانش فنی و هنر طراحی چهره، نگاهی منحصر‌به‌فرد برای شما خلق می‌کنیم.
+                </p>
             </div>
-        </div>
-        <table>
-            <tr class="bg-gray"><th>Description</th><th>Amount (IRR)</th></tr>
-            <tr><td>Consumption / Subscription</td><td>355,206</td></tr>
-            <tr><td>Tax & Duties</td><td>71,667</td></tr>
-            <tr><td>Insurance</td><td>142,500</td></tr>
-            <tr class="bg-gray"><td><b>Total Payable</b></td><td style="color:red; font-weight:900" class="out_total"></td></tr>
-        </table>
+        </section>
+
+        <footer>
+            <p>کلیه حقوق مادی و معنوی این وب‌سایت متعلق به <strong>NARGES TARAFI</strong> می‌باشد.</p>
+            <p style="margin-top:10px; color:#666;">⛔ کپی‌برداری از طرح، تصاویر و محتوا پیگرد قانونی جدی دارد.</p>
+        </footer>
+
+        <nav class="bottom-nav">
+            <a href="https://www.instagram.com/farges73" class="social-link"><i class="fab fa-instagram"></i></a>
+            <a href="https://t.me/Nargesfarzin1" class="social-link"><i class="fab fa-telegram"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-whatsapp"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+            <a href="#" class="social-link"><i class="fas fa-envelope"></i></a>
+        </nav>
     </div>
 
-    <div class="middle-red-warning">FAILURE TO PAY ON TIME WILL RESULT IN DISCONNECTION</div>
+    <script>
+        function startApp() {
+            document.getElementById('introPage').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('introPage').style.display = 'none';
+                document.getElementById('mainSite').style.display = 'block';
+                initRain();
+            }, 500);
+        }
 
-    <div class="visual-grid">
-        <div class="pay-card">
-            <div>Total Payable (Rials)</div>
-            <div class="price-large class_price"></div>
-            <div>Due Date: <b class="out_deadline"></b></div>
-        </div>
-        <div class="gauge-wrap">
-            <svg class="gauge-svg" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="40" fill="none" stroke="#eee" stroke-width="10" />
-                <circle cx="50" cy="50" r="40" fill="none" stroke="#4caf50" stroke-width="10" stroke-dasharray="120 251" />
-                <line x1="50" y1="50" x2="50" y2="15" stroke="orange" stroke-width="3" transform="rotate(45 50 50)" />
-            </svg>
-            <div style="margin-top:-55px; font-weight:900; font-size:16px;">148.06</div>
-        </div>
-        <div>
-            <small>Consumption Comparison</small>
-            <div class="h-bar-bg"><div class="h-bar-fill" style="width:70%; background:#4caf50;">You: 148</div></div>
-            <div class="h-bar-bg"><div class="h-bar-fill" style="width:85%; background:#8bc34a;">City: 169</div></div>
-        </div>
-    </div>
-
-    <div class="footer">
-        <div style="text-align:center;">
-            <div style="width:50px; height:50px; background:#4caf50; border-radius:50%; margin:0 auto; line-height:50px; color:#fff; font-weight:bold;">-4%</div>
-            <p style="font-size:9px">Reduction vs Last Year</p>
-        </div>
-        <div style="padding: 10px; text-align: center;">
-            <b style="color:blue">IRAN POWER SYSTEM (MyBagh)</b>
-            <p>Install "MyBagh" app. Bargheman.com</p>
-        </div>
-        <div style="text-align:center">
-            <img src="https://uploadkon.ir/uploads/e17115_26IMG-۲۰۲۶۰۲۱۶-۰۳۱۵۲۱.jpg" class="agent-img">
-            <div><b>Mr. Ali Abrian</b></div>
-            <div style="font-size:9px;">Reading Officer</div>
-        </div>
-    </div>
-</div>
-
-<script>
-    function generate() {
-        const d = {
-            name: document.getElementById('in_name').value,
-            city: document.getElementById('in_city').value,
-            address: document.getElementById('in_address').value,
-            price: document.getElementById('in_price').value,
-            billid: document.getElementById('in_billid').value,
-            payid: document.getElementById('in_payid').value,
-            date: document.getElementById('in_date').value
-        };
-        
-        // آپدیت تمام فیلدهای فارسی و انگلیسی
-        document.querySelectorAll('.out_name').forEach(el => el.innerText = d.name);
-        document.querySelectorAll('.out_city').forEach(el => el.innerText = d.city);
-        document.querySelectorAll('.out_city_en').forEach(el => el.innerText = d.city);
-        document.querySelectorAll('.out_address').forEach(el => el.innerText = d.address);
-        document.querySelectorAll('.out_total').forEach(el => el.innerText = d.price);
-        document.querySelectorAll('.class_price').forEach(el => el.innerText = d.price);
-        document.querySelectorAll('.out_billid').forEach(el => el.innerText = d.billid);
-        document.querySelectorAll('.out_payid').forEach(el => el.innerText = d.payid);
-        document.querySelectorAll('.out_deadline').forEach(el => el.innerText = d.date);
-        
-        document.getElementById('fa_bill').style.display = 'block';
-        document.getElementById('en_bill').style.display = 'block';
-        
-        window.scrollTo({ top: document.getElementById('fa_bill').offsetTop, behavior: 'smooth' });
-    }
-</script>
+        function initRain() {
+            const canvas = document.getElementById('rainCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            let drops = [];
+            for(let i=0; i<85; i++) drops.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, l:Math.random()*25+10, v:Math.random()*5+5});
+            function draw() {
+                ctx.clearRect(0,0,canvas.width, canvas.height);
+                ctx.lineWidth=2; ctx.lineCap='round';
+                drops.forEach(d => {
+                    ctx.strokeStyle = '#00d2ff44'; ctx.beginPath(); ctx.moveTo(d.x, d.y); ctx.lineTo(d.x, d.y+d.l); ctx.stroke();
+                    d.y+=d.v; if(d.y > canvas.height) d.y=-d.l;
+                });
+                requestAnimationFrame(draw);
+            }
+            draw();
+        }
+    </script>
 </body>
 </html>
